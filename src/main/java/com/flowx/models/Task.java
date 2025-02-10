@@ -31,7 +31,7 @@ public class Task {
     private LocalDateTime updatedAt;
 
     // CONSTRUCTORS
-    public Task() {} // JPA needs an empty constructor to create objects from database rows...
+    public Task() {} // empty constructor for JPA
 
     public Task(String title, String description, TaskPriority priority) {
         this.title = title;
@@ -39,6 +39,17 @@ public class Task {
         this.completed = false;
         this.priority = TaskPriority.QUEUE; // default value: queue
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
