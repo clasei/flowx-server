@@ -1,4 +1,4 @@
-package com.flowx.flowx_server;
+package com.flowx;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
