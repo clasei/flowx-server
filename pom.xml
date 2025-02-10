@@ -6,13 +6,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.2</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.flowx</groupId>
 	<artifactId>flowx-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>flowx-server</name>
-	<description>Flowx is a simple task management API built with Spring Boot and PostgreSQL</description>
+	<description>flowx is a simple task management API built with Spring Boot and PostgreSQL</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -30,27 +30,41 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		<!-- Spring Boot Actuator for monitoring and metrics -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<!-- <artifactId>spring-boot-starter-data-jpa</artifactId> -->
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<!-- Spring Boot Web -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
+		<!-- JPA Support -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<!-- Jakarta Persistence API -->
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+		<!-- PostgreSQL Driver -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- Spring Boot DevTools -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+		<!-- Spring Boot Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
