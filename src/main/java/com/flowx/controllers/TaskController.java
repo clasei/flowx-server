@@ -2,11 +2,16 @@ package com.flowx.controllers;
 
 import com.flowx.models.Task;
 import com.flowx.services.TaskService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid; // validates the whole object = task data
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*; // all annotations included: e.g. @RestController, @RequestMapping
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional; // avoids null checks
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -33,13 +38,13 @@ public class TaskController {
 
     // POST a new task
     @PostMapping
-    public Task createTask(@RequestBody Task task) {
+    public Task createTask(@Valid @RequestBody Task task) {
         return taskService.createTask(task);
     }
 
     // PUT (update) a task
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task taskData) {
+    public ResponseEntity<Task> updateTask(@PathVariable Long id, @Valid @RequestBody Task taskData) {
         try {
             Task updatedTask = taskService.updateTask(id, taskData);
             return ResponseEntity.ok(updatedTask);
@@ -53,5 +58,19 @@ public class TaskController {
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails
+    @ExceptionHandler(MethodArgumentNotValidException.class) // catch validation errors
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>(); // initialize errors map
+
+        ex.getBindingResult().getAllErrors().forEach((error) -> { // loops through validation errors
+            String fieldName = ((org.springframework.validation.FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage); // store errors
+        });
+        return errors; // returns errors as a JSON response
     }
 }

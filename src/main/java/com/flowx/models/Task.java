@@ -1,6 +1,8 @@
 package com.flowx.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank; // checks specific field
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 
@@ -13,9 +15,12 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary Key
 
+    @NotBlank(message = "choose a title for your task")
+    @Size(min = 3, max = 240, message = "title must be between 3 and 240 chars")
     @Column(nullable = false)
     private String title;
 
+    @Size(max = 510, message = "description must be under 510 characters")
     @Column(columnDefinition = "TEXT")
     private String description;
 
