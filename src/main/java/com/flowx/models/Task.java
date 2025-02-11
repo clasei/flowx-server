@@ -26,23 +26,23 @@ public class Task {
 
     private boolean completed; // Java default: false
 
-    @Enumerated(EnumType.STRING)
+    // test-IN...
     @Column(nullable = false)
-    private TaskPriority priority;
+    private int priority; // store priority as an int
+
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     // CONSTRUCTORS
     public Task() {} // empty constructor for JPA
 
-    public Task(String title, String description, TaskPriority priority) {
+    public Task(String title, String description, int priorityValue) {
         this.title = title;
         this.description = description;
         this.completed = false;
-        this.priority = TaskPriority.QUEUE; // default value: queue
+        this.priority = priorityValue;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -58,6 +58,7 @@ public class Task {
         this.updatedAt = LocalDateTime.now();
     }
 
+
     // GETTERS & SETTERS
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -72,8 +73,10 @@ public class Task {
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
 
-    public TaskPriority getPriority() { return priority; }
-    public void setPriority(TaskPriority priority) { this.priority = priority; }
+    // testing...
+    public int getPriority() { return priority; }
+    public void setPriority(int priorityValue) { this.priority = priorityValue; }
+
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

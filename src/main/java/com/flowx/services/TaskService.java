@@ -1,11 +1,14 @@
 package com.flowx.services;
 
 import com.flowx.models.Task;
+import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+//import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,8 +27,8 @@ public class TaskService {
     }
 
     // get all tasks
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public Page<Task> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable);
     }
 
     // get a task by id
@@ -39,7 +42,7 @@ public class TaskService {
                 .map(task -> {
                     task.setTitle(newTaskData.getTitle());
                     task.setDescription(newTaskData.getDescription());
-                    task.setPriority(newTaskData.getPriority());
+                    task.setPriority(TaskPriority.fromLevel(newTaskData.getPriority()).getLevel());
                     task.setCompleted(newTaskData.isCompleted());
                     task.setUpdatedAt(newTaskData.getUpdatedAt());
                     return taskRepository.save(task);
