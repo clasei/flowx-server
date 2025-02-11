@@ -3,12 +3,16 @@ package com.flowx.controllers;
 import com.flowx.models.Task;
 import com.flowx.services.TaskService;
 import jakarta.validation.Valid; // validates the whole object = task data
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*; // all annotations included: e.g. @RestController, @RequestMapping
 
-import java.util.List;
+//import java.util.List;
 import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
@@ -25,8 +29,18 @@ public class TaskController {
 
     // GET all tasks
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+//    public List<Task> getAllTasks() {
+//        return taskService.getAllTasks();
+//    }
+    public Page<Task> getAllTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "7") int size,
+            @RequestParam(defaultValue = "priority") String sort,
+            @RequestParam(defaultValue = "DESC") String direction
+
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
+        return taskService.getAllTasks(pageable);
     }
 
     // GET a single task by id
