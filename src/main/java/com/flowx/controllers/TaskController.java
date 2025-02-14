@@ -11,12 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*; // all annotations included: e.g. @RestController, @RequestMapping
+import org.springframework.web.bind.annotation.CrossOrigin; // allows requests from any origin
 
 //import java.util.List;
 import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
