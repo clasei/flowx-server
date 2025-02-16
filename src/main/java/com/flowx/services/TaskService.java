@@ -48,14 +48,15 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
+    // put = toggle completion status
+    public Task saveTask(Task task) {
+        return taskRepository.save(task);
+    }
+
     // delete a task -- by id
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
 
-    // put = toggle completion status
-    public Task saveTask(Task task) {
-        return taskRepository.save(task);
-    }
 
 }

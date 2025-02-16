@@ -62,9 +62,11 @@ public class TaskController {
         Optional<Task> taskOptional = taskService.getTaskById(id);
         if (taskOptional.isPresent()) {
             Task task = taskOptional.get();
-            task.setCompleted(!task.isCompleted()); // Alterna true/false
-            task.setUpdatedAt(java.time.LocalDateTime.now()); // Actualiza timestamp
-            Task updatedTask = taskService.saveTask(task);
+            task.setCompleted(!task.isCompleted()); // toggle true/false
+            task.setUpdatedAt(java.time.LocalDateTime.now()); // update timestamp
+
+            Task updatedTask = taskService.updateTask(id, task); // ensure persistence
+
             return ResponseEntity.ok(updatedTask);
         } else {
             return ResponseEntity.notFound().build();
