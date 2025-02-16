@@ -16,11 +16,11 @@ public class Task {
     private Long id; // Primary Key
 
     @NotBlank(message = "choose a title for your task")
-    @Size(min = 3, max = 240, message = "title must be between 3 and 240 chars")
+    @Size(min = 3, max = 120, message = "title must be between 3 and 120 chars")
     @Column(nullable = false)
     private String title;
 
-    @Size(max = 510, message = "description must be under 510 characters")
+    @Size(max = 490, message = "description must be under 490 characters")
     @Column(columnDefinition = "TEXT")
     private String description;
 
