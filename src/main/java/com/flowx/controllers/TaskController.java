@@ -3,10 +3,6 @@ package com.flowx.controllers;
 import com.flowx.models.Task;
 import com.flowx.services.TaskService;
 import jakarta.validation.Valid; // validates the whole object = task data
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,17 +32,6 @@ public class TaskController {
         return taskService.getAllTasks();
     }
 
-//    public Page<Task> getAllTasks(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "7") int size,
-//            @RequestParam(defaultValue = "priority") String sort,
-//            @RequestParam(defaultValue = "DESC") String direction
-//
-//    ) {
-//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
-//        return taskService.getAllTasks(pageable);
-//    }
-
     // GET a single task by id
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
@@ -67,6 +52,21 @@ public class TaskController {
             Task updatedTask = taskService.updateTask(id, taskData);
             return ResponseEntity.ok(updatedTask);
         } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // PUT (toggle completion status)
+    @PutMapping("/{id}/toggle")
+    public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
+        Optional<Task> taskOptional = taskService.getTaskById(id);
+        if (taskOptional.isPresent()) {
+            Task task = taskOptional.get();
+            task.setCompleted(!task.isCompleted()); // Alterna true/false
+            task.setUpdatedAt(java.time.LocalDateTime.now()); // Actualiza timestamp
+            Task updatedTask = taskService.saveTask(task);
+            return ResponseEntity.ok(updatedTask);
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
