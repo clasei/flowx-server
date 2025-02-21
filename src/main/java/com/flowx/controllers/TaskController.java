@@ -2,47 +2,40 @@ package com.flowx.controllers;
 
 import com.flowx.models.Task;
 import com.flowx.services.TaskService;
+import com.flowx.repositories.TaskRepository;
 import jakarta.validation.Valid; // validates the whole object = task data
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*; // all annotations included: e.g. @RestController, @RequestMapping
 import org.springframework.web.bind.annotation.CrossOrigin; // allows requests from any origin
+import org.springframework.beans.factory.annotation.Autowired;
 
-//import java.util.List;
+import java.util.List;
 import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@SuppressWarnings("unused") // just to avoid unused warnings
+@CrossOrigin(origins = "http://localhost:4200") // check before deployment
 @RestController
 @RequestMapping("/tasks")
+
 public class TaskController {
 
-    private final TaskService taskService;
+    private final TaskService taskService; // inject the repository == define task-service (already imported)
+    private final TaskRepository taskRepository;
 
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
+    @Autowired
+    public TaskController(TaskService taskService, TaskRepository taskRepository) {
+        this.taskService = taskService; // assign the repository
+        this.taskRepository = taskRepository;
     }
 
     // GET all tasks
     @GetMapping
-//    public List<Task> getAllTasks() {
-//        return taskService.getAllTasks();
-//    }
-    public Page<Task> getAllTasks(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "7") int size,
-            @RequestParam(defaultValue = "priority") String sort,
-            @RequestParam(defaultValue = "DESC") String direction
-
-    ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
-        return taskService.getAllTasks(pageable);
+    public List<Task> getAllTasks() {
+        return taskService.getAllTasks();
     }
 
     // GET a single task by id
@@ -69,12 +62,46 @@ public class TaskController {
         }
     }
 
-    // DELETE a task
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
-        return ResponseEntity.noContent().build();
+    // PUT (toggle completion status)
+    @PutMapping("/{id}/toggle")
+    public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
+        Optional<Task> taskOptional = taskService.getTaskById(id);
+        if (taskOptional.isPresent()) {
+            Task task = taskOptional.get();
+            task.setCompleted(!task.isCompleted()); // toggle true/false
+            task.setUpdatedAt(java.time.LocalDateTime.now()); // update timestamp
+
+            Task updatedTask = taskService.updateTask(id, task); // ensure persistence
+
+            return ResponseEntity.ok(updatedTask);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
+    // DELETE a task by id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+        try {
+            taskService.deleteTask(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete task: " + e.getMessage());
+        }
+    }
+
+
+    // DELETE all completed tasks
+    @DeleteMapping("/completed")
+    public ResponseEntity<?> deleteAllCompletedTasks() {
+        try {
+            int deletedCount = taskRepository.deleteByCompleted();
+            return ResponseEntity.ok("Deleted " + deletedCount + " completed tasks.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete completed tasks.");
+        }
+    }
+
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails

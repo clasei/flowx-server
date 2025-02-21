@@ -1,9 +1,9 @@
 package com.flowx.models;
 
 public enum TaskPriority {
-    URGENT(3),
-    IMPORTANT(2),
-    QUEUE(1);
+    CRITICAL(3),
+    FOCUS(2),
+    PIPELINE(1);
 
     private final int level;
 

@@ -3,12 +3,10 @@ package com.flowx.services;
 import com.flowx.models.Task;
 import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-//import java.util.List;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,8 +25,8 @@ public class TaskService {
     }
 
     // get all tasks
-    public Page<Task> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable);
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
     }
 
     // get a task by id
@@ -50,8 +48,15 @@ public class TaskService {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
+    // put = toggle completion status
+    public Task saveTask(Task task) {
+        return taskRepository.save(task);
+    }
+
     // delete a task -- by id
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
+
+
 }
