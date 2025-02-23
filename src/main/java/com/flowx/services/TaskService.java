@@ -4,6 +4,7 @@ import com.flowx.models.Task;
 import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,11 @@ public class TaskService {
     @Autowired
     public TaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
+    }
+
+    @Transactional
+    public int deleteAllCompletedTasks() {
+        return taskRepository.deleteByCompleted();
     }
 
     // create a new task

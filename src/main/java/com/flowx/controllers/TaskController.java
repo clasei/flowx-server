@@ -92,16 +92,31 @@ public class TaskController {
 
 
     // DELETE all completed tasks
+
+//    @DeleteMapping("/completed")
+//    public ResponseEntity<?> deleteAllCompletedTasks() {
+//        try {
+//            int deletedCount = taskRepository.deleteByCompleted();
+//            return ResponseEntity.ok("Deleted " + deletedCount + " completed tasks.");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete completed tasks.");
+//        }
+//    }
+
     @DeleteMapping("/completed")
-    public ResponseEntity<?> deleteAllCompletedTasks() {
+    public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+        Map<String, Object> response = new HashMap<>();
         try {
-            int deletedCount = taskRepository.deleteByCompleted();
-            return ResponseEntity.ok("Deleted " + deletedCount + " completed tasks.");
+            int deletedCount = taskService.deleteAllCompletedTasks();
+            response.put("message", "Deleted " + deletedCount + " completed tasks.");
+            response.put("status", "success");
+            return ResponseEntity.ok(response); // ✅ JSON response
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete completed tasks.");
+            response.put("message", "Failed to delete completed tasks.");
+            response.put("status", "error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails
