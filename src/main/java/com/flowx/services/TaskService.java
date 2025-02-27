@@ -5,10 +5,12 @@ import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 public class TaskService {
@@ -29,6 +31,14 @@ public class TaskService {
     public Task createTask(Task task) {
         return taskRepository.save(task);
     }
+
+//    public Task createTask(Task task) {
+//        if (task.isRepeating() && task.getRepeatInterval() != null) {
+//            task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+//        }
+//        return taskRepository.save(task);
+//    }
+
 
     // get all tasks
     public List<Task> getAllTasks() {
@@ -64,5 +74,17 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
+    @Scheduled(fixedRate = 600000) // Every 10 minutes
+    public void resetRecurringTasks() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Task> overdueTasks = taskRepository.findByNextRepeatDateBeforeAndCompleted(now, true);
+
+        for (Task task : overdueTasks) {
+            System.out.println("🔄 Resetting recurring task: " + task.getTitle());
+            task.setCompleted(false);
+            task.setNextRepeatDate(null); // Reset repeat date
+            taskRepository.save(task);
+        }
+    }
 
 }
