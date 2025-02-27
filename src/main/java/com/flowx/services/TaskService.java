@@ -117,17 +117,35 @@ public class TaskService {
 //                .orElseThrow(() -> new RuntimeException("Task not found"));
 //    }
 
+    // // WEIRD WAY -- reset next repeat date when undo --------------
+//    public Task toggleTaskCompletion(Long id) {
+//        return taskRepository.findById(id)
+//                .map(task -> {
+//                    task.setCompleted(!task.isCompleted());
+//                    task.setUpdatedAt(LocalDateTime.now());
+//
+//                    if (task.isCompleted() && task.isRepeating() && task.getRepeatInterval() != null) {
+//                        // 🔥 Ensure next repeat date is set correctly
+//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+//                    } else if (!task.isRepeating()) {
+//                        // 🔥 If it's not repeating, reset nextRepeatDate
+//                        task.setNextRepeatDate(null);
+//                    }
+//
+//                    return taskRepository.save(task);
+//                })
+//                .orElseThrow(() -> new RuntimeException("Task not found"));
+//    }
+
     public Task toggleTaskCompletion(Long id) {
         return taskRepository.findById(id)
                 .map(task -> {
                     task.setCompleted(!task.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
 
-                    if (task.isCompleted() && task.isRepeating() && task.getRepeatInterval() != null) {
-                        // 🔥 Ensure next repeat date is set correctly
-                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-                    } else if (!task.isRepeating()) {
-                        // 🔥 If it's not repeating, reset nextRepeatDate
+                    // ❌ DO NOT reset nextRepeatDate when marking as done
+
+                    if (!task.isRepeating()) {
                         task.setNextRepeatDate(null);
                     }
 
@@ -135,7 +153,6 @@ public class TaskService {
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
-
 
 
 
