@@ -28,16 +28,29 @@ public class TaskService {
     }
 
     // create a new task
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
-    }
 
 //    public Task createTask(Task task) {
-//        if (task.isRepeating() && task.getRepeatInterval() != null) {
-//            task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-//        }
 //        return taskRepository.save(task);
 //    }
+
+    public Task createTask(Task task) {
+        System.out.println("🔥 Incoming Task: " + task);  // Debugging
+
+        // Ensure isRepeating is correctly assigned
+        boolean isActuallyRepeating = task.isRepeating(); // Capture the original value
+
+        if (isActuallyRepeating && task.getRepeatInterval() != null) {
+            task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+        }
+
+        task.setRepeating(isActuallyRepeating); // 🔥 Ensure it is not lost
+
+        Task savedTask = taskRepository.save(task);
+        System.out.println("✅ Saved Task: " + savedTask);  // Debugging
+
+        return savedTask;
+    }
+
 
 
     // get all tasks
@@ -58,16 +71,69 @@ public class TaskService {
                     task.setDescription(newTaskData.getDescription());
                     task.setPriority(TaskPriority.fromLevel(newTaskData.getPriority()).getLevel());
                     task.setCompleted(newTaskData.isCompleted());
-                    task.setUpdatedAt(newTaskData.getUpdatedAt());
+                    task.setUpdatedAt(LocalDateTime.now());
+
+                    // Ensure isRepeating and repeatInterval are updated correctly
+                    task.setRepeating(newTaskData.isRepeating());
+                    task.setRepeatInterval(newTaskData.getRepeatInterval());
+
+                    // If task is repeating and completed, update nextRepeatDate
+                    if (task.isRepeating() && task.isCompleted() && task.getRepeatInterval() != null) {
+                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+                    } else {
+                        task.setNextRepeatDate(null);
+                    }
+
                     return taskRepository.save(task);
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
 
-    // put = toggle completion status
+
+    // put = save toggled task
     public Task saveTask(Task task) {
         return taskRepository.save(task);
     }
+
+    // toggle task completion
+//    public Task toggleTaskCompletion(Long id) {
+//        return taskRepository.findById(id)
+//                .map(task -> {
+//                    task.setCompleted(!task.isCompleted());
+//                    task.setUpdatedAt(LocalDateTime.now());
+//
+//                    if (task.isRepeating() && task.isCompleted() && task.getRepeatInterval() != null) {
+//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+//                    } else {
+//                        task.setNextRepeatDate(null);
+//                    }
+//
+//                    return taskRepository.save(task);
+//                })
+//                .orElseThrow(() -> new RuntimeException("Task not found"));
+//    }
+
+    public Task toggleTaskCompletion(Long id) {
+        return taskRepository.findById(id)
+                .map(task -> {
+                    task.setCompleted(!task.isCompleted());
+                    task.setUpdatedAt(LocalDateTime.now());
+
+                    if (task.isCompleted() && task.isRepeating() && task.getRepeatInterval() != null) {
+                        // 🔥 Ensure next repeat date is set correctly
+                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+                    } else if (!task.isRepeating()) {
+                        // 🔥 If it's not repeating, reset nextRepeatDate
+                        task.setNextRepeatDate(null);
+                    }
+
+                    return taskRepository.save(task);
+                })
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
+
+
 
     // delete a task -- by id
     public void deleteTask(Long id) {
@@ -86,5 +152,10 @@ public class TaskService {
             taskRepository.save(task);
         }
     }
+
+    private LocalDateTime calculateNextRepeatDate(int repeatInterval) {
+        return LocalDateTime.now().plusDays(repeatInterval);
+    }
+
 
 }

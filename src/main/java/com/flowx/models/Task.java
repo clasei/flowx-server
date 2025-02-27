@@ -5,9 +5,12 @@ import jakarta.validation.constraints.NotBlank; // checks specific field
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 @Entity // tells JPA that this is an entity and will be mapped to the db
 @Table(name = "tasks") // maps this entity to the "tasks" table
+
 
 public class Task {
 
@@ -36,8 +39,9 @@ public class Task {
     private LocalDateTime updatedAt;
 
     // new feature: recurring tasks
+    @JsonProperty("repeating") // ensures JSON maps this as "repeating"
     @Column(nullable = false)
-    private boolean isRepeating = false;
+    private boolean repeating = false;
 
     @Column
     private Integer repeatInterval; // Days
@@ -47,14 +51,18 @@ public class Task {
 
 
     // CONSTRUCTORS
-    public Task() {} // empty constructor for JPA
 
-    public Task(String title, String description, int priorityValue) {
+    public Task() {
+        // jpa requires a no-argument constructor
+        // without it Hibernate (jpa) cannot instantiate objects when running GET queries aka fetching data
+    }
+
+    public Task(String title, String description, int priority, boolean repeating, Integer repeatInterval, LocalDateTime nextRepeatDate) {
         this.title = title;
         this.description = description;
         this.completed = false;
-        this.priority = priorityValue;
-        this.isRepeating = isRepeating;
+        this.priority = priority;
+        this.repeating = repeating;
         this.repeatInterval = repeatInterval;
         this.nextRepeatDate = nextRepeatDate;
         this.createdAt = LocalDateTime.now();
@@ -91,8 +99,16 @@ public class Task {
     public int getPriority() { return priority; }
     public void setPriority(int priorityValue) { this.priority = priorityValue; }
 
-    public boolean isRepeating() { return isRepeating; }
-    public void setRepeating(boolean repeating) { isRepeating = repeating; }
+
+    // ----------- issues issues issues will be solved
+//    public boolean isRepeating() { return isRepeating; }
+//    public void setRepeating(boolean isRepeating) { this.isRepeating = isRepeating; }
+    @JsonProperty("repeating") // ensures JSON correctly maps "repeating"
+    public boolean isRepeating() { return repeating; }
+
+    @JsonProperty("repeating") // ensures JSON correctly maps "repeating"
+    public void setRepeating(boolean repeating) { this.repeating = repeating; }
+
 
     public Integer getRepeatInterval() { return repeatInterval; }
     public void setRepeatInterval(Integer repeatInterval) { this.repeatInterval = repeatInterval; }

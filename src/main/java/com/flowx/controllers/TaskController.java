@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 
 @SuppressWarnings("unused") // just to avoid unused warnings
 @CrossOrigin(origins = "http://localhost:4200") // check before deployment
@@ -83,24 +83,10 @@ public class TaskController {
     // new feature: recurring tasks -- test
     @PutMapping("/{id}/toggle")
     public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
-        Optional<Task> taskOptional = taskService.getTaskById(id);
-        if (taskOptional.isPresent()) {
-            Task task = taskOptional.get();
-            task.setCompleted(!task.isCompleted()); // Toggle completion
-            task.setUpdatedAt(LocalDateTime.now()); // Update timestamp
-
-            if (task.isRepeating() && task.isCompleted()) {
-                // Set the next repeat date
-                LocalDateTime nextRepeat = LocalDateTime.now().plusDays(task.getRepeatInterval());
-                task.setNextRepeatDate(nextRepeat);
-            } else {
-                // Clear next repeat date when undone
-                task.setNextRepeatDate(null);
-            }
-
-            Task updatedTask = taskService.updateTask(id, task);
+        try {
+            Task updatedTask = taskService.toggleTaskCompletion(id);
             return ResponseEntity.ok(updatedTask);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
