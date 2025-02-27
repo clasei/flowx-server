@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
+//import java.time.LocalDateTime;
 
 @SuppressWarnings("unused") // just to avoid unused warnings
 @CrossOrigin(origins = "http://localhost:4200") // check before deployment
@@ -63,21 +64,33 @@ public class TaskController {
     }
 
     // PUT (toggle completion status)
+//    @PutMapping("/{id}/toggle")
+//    public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
+//        Optional<Task> taskOptional = taskService.getTaskById(id);
+//        if (taskOptional.isPresent()) {
+//            Task task = taskOptional.get();
+//            task.setCompleted(!task.isCompleted()); // toggle true/false
+//            task.setUpdatedAt(java.time.LocalDateTime.now()); // update timestamp
+//
+//            Task updatedTask = taskService.updateTask(id, task); // ensure persistence
+//
+//            return ResponseEntity.ok(updatedTask);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
+    // new feature: recurring tasks -- test
     @PutMapping("/{id}/toggle")
     public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
-        Optional<Task> taskOptional = taskService.getTaskById(id);
-        if (taskOptional.isPresent()) {
-            Task task = taskOptional.get();
-            task.setCompleted(!task.isCompleted()); // toggle true/false
-            task.setUpdatedAt(java.time.LocalDateTime.now()); // update timestamp
-
-            Task updatedTask = taskService.updateTask(id, task); // ensure persistence
-
+        try {
+            Task updatedTask = taskService.toggleTaskCompletion(id);
             return ResponseEntity.ok(updatedTask);
-        } else {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     // DELETE a task by id
     @DeleteMapping("/{id}")
@@ -92,16 +105,31 @@ public class TaskController {
 
 
     // DELETE all completed tasks
+
+//    @DeleteMapping("/completed")
+//    public ResponseEntity<?> deleteAllCompletedTasks() {
+//        try {
+//            int deletedCount = taskRepository.deleteByCompleted();
+//            return ResponseEntity.ok("Deleted " + deletedCount + " completed tasks.");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete completed tasks.");
+//        }
+//    }
+
     @DeleteMapping("/completed")
-    public ResponseEntity<?> deleteAllCompletedTasks() {
+    public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+        Map<String, Object> response = new HashMap<>();
         try {
-            int deletedCount = taskRepository.deleteByCompleted();
-            return ResponseEntity.ok("Deleted " + deletedCount + " completed tasks.");
+            int deletedCount = taskService.deleteAllCompletedTasks();
+            response.put("message", "Deleted " + deletedCount + " completed tasks.");
+            response.put("status", "success");
+            return ResponseEntity.ok(response); // ✅ JSON response
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete completed tasks.");
+            response.put("message", "Failed to delete completed tasks.");
+            response.put("status", "error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails
