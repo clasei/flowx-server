@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
@@ -77,15 +78,19 @@ public class TaskService {
                     task.setRepeating(newTaskData.isRepeating());
                     task.setRepeatInterval(newTaskData.getRepeatInterval());
 
-                    // 🔥 If task is repeating and interval is set, update nextRepeatDate
+                    // 🔥 Always recalculate nextRepeatDate if task is repeating
                     if (task.isRepeating() && task.getRepeatInterval() != null) {
                         task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+                    } else {
+                        // ❌ If repeating is turned off, clear nextRepeatDate
+                        task.setNextRepeatDate(null);
                     }
 
                     return taskRepository.save(task);
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
+
 
 
 
