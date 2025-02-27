@@ -69,25 +69,24 @@ public class TaskService {
                 .map(task -> {
                     task.setTitle(newTaskData.getTitle());
                     task.setDescription(newTaskData.getDescription());
-                    task.setPriority(TaskPriority.fromLevel(newTaskData.getPriority()).getLevel());
+                    task.setPriority(newTaskData.getPriority());
                     task.setCompleted(newTaskData.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
 
-                    // Ensure isRepeating and repeatInterval are updated correctly
+                    // Preserve repeating status
                     task.setRepeating(newTaskData.isRepeating());
                     task.setRepeatInterval(newTaskData.getRepeatInterval());
 
-                    // If task is repeating and completed, update nextRepeatDate
-                    if (task.isRepeating() && task.isCompleted() && task.getRepeatInterval() != null) {
+                    // 🔥 If task is repeating and interval is set, update nextRepeatDate
+                    if (task.isRepeating() && task.getRepeatInterval() != null) {
                         task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-                    } else {
-                        task.setNextRepeatDate(null);
                     }
 
                     return taskRepository.save(task);
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
+
 
 
     // put = save toggled task
