@@ -6,9 +6,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import java.io.IOException;
 
+import java.io.IOException;
+import java.util.Collections;
+
+@Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -28,14 +34,12 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7); // Extract token after "Bearer "
+        String token = authHeader.substring(7);
+        Claims claims = jwtUtil.validateToken(token);
 
-        try {
-            Claims claims = jwtUtil.validateToken(token);
-            request.setAttribute("claims", claims);
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-            return;
+        if (claims != null) {
+            UserDetails userDetails = new User(claims.getSubject(), "", Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(userDetails));
         }
 
         filterChain.doFilter(request, response);

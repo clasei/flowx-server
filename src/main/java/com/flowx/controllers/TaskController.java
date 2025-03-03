@@ -16,26 +16,49 @@ import java.util.Optional; // avoids null checks
 import java.util.HashMap;
 import java.util.Map;
 
+import com.flowx.security.JwtUtil;
+import io.jsonwebtoken.Claims;
+
 @SuppressWarnings("unused") // just to avoid unused warnings
-@CrossOrigin(origins = "http://localhost:4200") // check before deployment
+@CrossOrigin(origins = "http://localhost:4200") // CHECK before deployment !!!!
 @RestController
 @RequestMapping("/tasks")
-
 public class TaskController {
 
     private final TaskService taskService; // inject the repository == define task-service (already imported)
     private final TaskRepository taskRepository;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public TaskController(TaskService taskService, TaskRepository taskRepository) {
+    public TaskController(TaskService taskService, TaskRepository taskRepository, JwtUtil jwtUtil) {
         this.taskService = taskService; // assign the repository
         this.taskRepository = taskRepository;
+        this.jwtUtil = jwtUtil;
     }
 
-    // GET all tasks
+//    // GET all tasks
+//    @GetMapping
+//    public List<Task> getAllTasks() {
+//        return taskService.getAllTasks();
+//    }
+
+    // GET all tasks (Protected: Requires JWT token)
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<?> getAllTasks(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", ""); // Remove Bearer prefix
+            Claims claims = jwtUtil.validateToken(token); // Validate token
+            String username = claims.getSubject(); // Extract username from token
+
+            // Log the user accessing the tasks
+            System.out.println("User " + username + " accessed tasks.");
+
+            // Return tasks
+            List<Task> tasks = taskService.getAllTasks();
+            return ResponseEntity.ok(tasks);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
+        }
     }
 
     // GET a single task by id
