@@ -7,10 +7,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 @Entity // tells JPA that this is an entity and will be mapped to the db
 @Table(name = "tasks") // maps this entity to the "tasks" table
-
 
 public class Task {
 
