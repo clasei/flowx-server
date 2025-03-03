@@ -18,6 +18,8 @@ import java.util.Map;
 
 import com.flowx.security.JwtUtil;
 import io.jsonwebtoken.Claims;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @SuppressWarnings("unused") // just to avoid unused warnings
 @CrossOrigin(origins = "http://localhost:4200") // CHECK before deployment !!!!
@@ -43,22 +45,31 @@ public class TaskController {
 //    }
 
     // GET all tasks (Protected: Requires JWT token)
+
+//    @GetMapping
+//    public ResponseEntity<?> getAllTasks(@RequestHeader("Authorization") String authHeader) {
+//        try {
+//            String token = authHeader.replace("Bearer ", ""); // Remove Bearer prefix
+//            Claims claims = jwtUtil.validateToken(token); // Validate token
+//            String username = claims.getSubject(); // Extract username from token
+//
+//            // Log the user accessing the tasks
+//            System.out.println("User " + username + " accessed tasks.");
+//
+//            // Return tasks
+//            List<Task> tasks = taskService.getAllTasks();
+//            return ResponseEntity.ok(tasks);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
+//        }
+//    }
+
     @GetMapping
-    public ResponseEntity<?> getAllTasks(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.replace("Bearer ", ""); // Remove Bearer prefix
-            Claims claims = jwtUtil.validateToken(token); // Validate token
-            String username = claims.getSubject(); // Extract username from token
+    public ResponseEntity<List<Task>> getAllTasks() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " accessed tasks.");
 
-            // Log the user accessing the tasks
-            System.out.println("User " + username + " accessed tasks.");
-
-            // Return tasks
-            List<Task> tasks = taskService.getAllTasks();
-            return ResponseEntity.ok(tasks);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
-        }
+        return ResponseEntity.ok(taskService.getAllTasks());
     }
 
     // GET a single task by id
