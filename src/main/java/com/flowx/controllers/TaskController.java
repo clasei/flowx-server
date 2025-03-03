@@ -73,21 +73,54 @@ public class TaskController {
     }
 
     // GET a single task by id
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+//        Optional<Task> task = taskService.getTaskById(id);
+//        return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+//    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        Optional<Task> task = taskService.getTaskById(id);
-        return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " accessed task " + id);
+
+        return taskService.getTaskById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     // POST a new task
+//    @PostMapping
+//    public Task createTask(@Valid @RequestBody Task task) {
+//        return taskService.createTask(task);
+//    }
+
     @PostMapping
-    public Task createTask(@Valid @RequestBody Task task) {
-        return taskService.createTask(task);
+    public ResponseEntity<Task> createTask(@Valid @RequestBody Task task) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " is creating a task.");
+
+        return ResponseEntity.ok(taskService.createTask(task));
     }
 
+
     // PUT (update) a task
+//    @PutMapping("/{id}")
+//    public ResponseEntity<Task> updateTask(@PathVariable Long id, @Valid @RequestBody Task taskData) {
+//        try {
+//            Task updatedTask = taskService.updateTask(id, taskData);
+//            return ResponseEntity.ok(updatedTask);
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @Valid @RequestBody Task taskData) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " is updating task " + id);
+
         try {
             Task updatedTask = taskService.updateTask(id, taskData);
             return ResponseEntity.ok(updatedTask);
@@ -113,9 +146,22 @@ public class TaskController {
 //        }
 //    }
 
-    // new feature: recurring tasks -- test
+
+//    @PutMapping("/{id}/toggle")
+//    public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
+//        try {
+//            Task updatedTask = taskService.toggleTaskCompletion(id);
+//            return ResponseEntity.ok(updatedTask);
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
     @PutMapping("/{id}/toggle")
     public ResponseEntity<Task> toggleTaskCompletion(@PathVariable Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " is toggling completion for task " + id);
+
         try {
             Task updatedTask = taskService.toggleTaskCompletion(id);
             return ResponseEntity.ok(updatedTask);
@@ -126,8 +172,21 @@ public class TaskController {
 
 
     // DELETE a task by id
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+//        try {
+//            taskService.deleteTask(id);
+//            return ResponseEntity.noContent().build();
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete task: " + e.getMessage());
+//        }
+//    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " is deleting task " + id);
+
         try {
             taskService.deleteTask(id);
             return ResponseEntity.noContent().build();
@@ -149,20 +208,39 @@ public class TaskController {
 //        }
 //    }
 
+//    @DeleteMapping("/completed")
+//    public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+//        Map<String, Object> response = new HashMap<>();
+//        try {
+//            int deletedCount = taskService.deleteAllCompletedTasks();
+//            response.put("message", "Deleted " + deletedCount + " completed tasks.");
+//            response.put("status", "success");
+//            return ResponseEntity.ok(response); // ✅ JSON response
+//        } catch (Exception e) {
+//            response.put("message", "Failed to delete completed tasks.");
+//            response.put("status", "error");
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//        }
+//    }
+
     @DeleteMapping("/completed")
     public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println("User " + userDetails.getUsername() + " is deleting all completed tasks.");
+
         Map<String, Object> response = new HashMap<>();
         try {
             int deletedCount = taskService.deleteAllCompletedTasks();
             response.put("message", "Deleted " + deletedCount + " completed tasks.");
             response.put("status", "success");
-            return ResponseEntity.ok(response); // ✅ JSON response
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.put("message", "Failed to delete completed tasks.");
             response.put("status", "error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails
