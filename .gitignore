@@ -59,5 +59,12 @@ build/
 hs_err_pid*
 replay_pid*
 
+# Ignore Maven dependencies (optional)
+.m2/
+
 # application.properties + pws
 src/main/resources/application.properties
+application.yml
+
+# Ignore environment files
+.env

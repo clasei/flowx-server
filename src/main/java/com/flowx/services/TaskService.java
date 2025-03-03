@@ -161,7 +161,7 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
-    @Scheduled(fixedRate = 600000) // Every 10 minutes
+    @Scheduled(fixedRate = 3600000)
     public void resetRecurringTasks() {
         LocalDateTime now = LocalDateTime.now();
         List<Task> overdueTasks = taskRepository.findByNextRepeatDateBeforeAndCompleted(now, true);
