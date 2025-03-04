@@ -1,8 +1,11 @@
 package com.flowx.controllers;
 
 import com.flowx.models.Task;
-import com.flowx.services.TaskService;
 import com.flowx.repositories.TaskRepository;
+import com.flowx.models.User;
+import com.flowx.repositories.UserRepository;
+import com.flowx.services.TaskService;
+
 import jakarta.validation.Valid; // validates the whole object = task data
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; // flexible HTTP responses: lets return data & status codes
@@ -11,10 +14,11 @@ import org.springframework.web.bind.annotation.*; // all annotations included: e
 import org.springframework.web.bind.annotation.CrossOrigin; // allows requests from any origin
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Optional; // avoids null checks
-import java.util.HashMap;
-import java.util.Map;
+//import java.util.List;
+//import java.util.Optional; // avoids null checks
+//import java.util.HashMap;
+//import java.util.Map;
+import java.util.*;
 
 import com.flowx.security.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -29,13 +33,38 @@ public class TaskController {
 
     private final TaskService taskService; // inject the repository == define task-service (already imported)
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public TaskController(TaskService taskService, TaskRepository taskRepository, JwtUtil jwtUtil) {
+    public TaskController(TaskService taskService, TaskRepository taskRepository, UserRepository userRepository, JwtUtil jwtUtil) {
         this.taskService = taskService; // assign the repository
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
+    }
+
+    // GET USER TASKS
+    @GetMapping
+    public ResponseEntity<?> getUserTasks(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Claims claims = jwtUtil.validateToken(token);
+            String username = claims.getSubject();
+
+            // Find the user
+            Optional<User> userOpt = userRepository.findByUsername(username);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.status(401).body("User not found");
+            }
+            User user = userOpt.get();
+
+            // Fetch only tasks for this user
+            List<Task> tasks = taskRepository.findByCreatedBy(user);
+            return ResponseEntity.ok(tasks);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid or expired token");
+        }
     }
 
 //    // GET all tasks
@@ -96,12 +125,18 @@ public class TaskController {
 //        return taskService.createTask(task);
 //    }
 
-    @PostMapping
-    public ResponseEntity<Task> createTask(@Valid @RequestBody Task task) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("User " + userDetails.getUsername() + " is creating a task.");
+//    @PostMapping
+//    public ResponseEntity<Task> createTask(@Valid @RequestBody Task task) {
+//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        System.out.println("User " + userDetails.getUsername() + " is creating a task.");
+//
+//        return ResponseEntity.ok(taskService.createTask(task));
+//    }
 
-        return ResponseEntity.ok(taskService.createTask(task));
+    @PostMapping("/tasks/{userId}")
+    public ResponseEntity<Task> createTask(@PathVariable Long userId, @RequestBody Task task) {
+        Task createdTask = taskService.createTask(task, userId);
+        return ResponseEntity.ok(createdTask);
     }
 
 

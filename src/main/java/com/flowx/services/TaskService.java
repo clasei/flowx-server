@@ -1,8 +1,9 @@
 package com.flowx.services;
 
 import com.flowx.models.Task;
-import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
+import com.flowx.models.User;
+import com.flowx.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,10 +18,12 @@ import java.time.LocalDateTime;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -34,8 +37,14 @@ public class TaskService {
 //        return taskRepository.save(task);
 //    }
 
-    public Task createTask(Task task) {
+    public Task createTask(Task task, Long userId) {  // 🔹 Now accepts userId
         System.out.println("🔥 Incoming Task: " + task);  // Debugging
+
+        // Fetch user from database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        task.setCreatedBy(user); // Assign the user before saving
 
         // Ensure isRepeating is correctly assigned
         boolean isActuallyRepeating = task.isRepeating(); // Capture the original value
@@ -51,7 +60,6 @@ public class TaskService {
 
         return savedTask;
     }
-
 
 
     // get all tasks
