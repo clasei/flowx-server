@@ -182,6 +182,12 @@ public class TaskService {
         }
     }
 
+    // delete completed by user
+    public int deleteCompletedTasksByUser(User user) {
+        return taskRepository.deleteByCreatedByAndCompletedTrue(user);
+    }
+
+
     private LocalDateTime calculateNextRepeatDate(int repeatInterval) {
         return LocalDateTime.now().plusDays(repeatInterval);
     }

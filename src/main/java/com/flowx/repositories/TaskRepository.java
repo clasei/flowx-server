@@ -5,6 +5,7 @@ import com.flowx.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,4 +21,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Modifying
     @Query("DELETE FROM Task t WHERE t.completed = true")
     int deleteByCompleted();
+
+    @Modifying
+    @Query("DELETE FROM Task t WHERE t.createdBy = :user AND t.completed = true")
+    int deleteByCreatedByAndCompletedTrue(@Param("user") User user);
+
 }
