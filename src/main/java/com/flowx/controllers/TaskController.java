@@ -329,39 +329,71 @@ public class TaskController {
     }
 
 
-    @DeleteMapping("/completed")
-    public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("User " + userDetails.getUsername() + " is attempting to delete all completed tasks.");
+//    @DeleteMapping("/completed")
+//    public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        System.out.println("User " + userDetails.getUsername() + " is attempting to delete all completed tasks.");
+//
+//        Map<String, Object> response = new HashMap<>();
+//        try {
+//            // ✅ Get the logged-in user
+//            String username = userDetails.getUsername();
+//            Optional<User> userOpt = userRepository.findByUsername(username);
+//
+//            if (userOpt.isEmpty()) {
+//                response.put("message", "User not found.");
+//                response.put("status", "error");
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+//            }
+//
+//            User user = userOpt.get();
+//
+//            // ✅ Delete only the completed tasks **owned by this user**
+////            int deletedCount = taskService.deleteCompletedTasksByUser(user);
+//
+//            int deletedCount = taskService.deleteCompletedTasksByUser(user.getUser_id());
+//
+//            response.put("message", "Deleted " + deletedCount + " completed tasks.");
+//            response.put("status", "success");
+//            return ResponseEntity.ok(response);
+//
+//        } catch (Exception e) {
+//            response.put("message", "Failed to delete completed tasks.");
+//            response.put("status", "error");
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+//        }
+//    }
 
-        Map<String, Object> response = new HashMap<>();
-        try {
-            // ✅ Get the logged-in user
-            String username = userDetails.getUsername();
-            Optional<User> userOpt = userRepository.findByUsername(username);
+@DeleteMapping("/completed")
+public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    System.out.println("User " + userDetails.getUsername() + " is attempting to delete all completed tasks.");
 
-            if (userOpt.isEmpty()) {
-                response.put("message", "User not found.");
-                response.put("status", "error");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
+    Map<String, Object> response = new HashMap<>();
+    try {
+        String username = userDetails.getUsername();
+        Optional<User> userOpt = userRepository.findByUsername(username);
 
-            User user = userOpt.get();
-
-            // ✅ Delete only the completed tasks **owned by this user**
-            int deletedCount = taskService.deleteCompletedTasksByUser(user);
-
-            response.put("message", "Deleted " + deletedCount + " completed tasks.");
-            response.put("status", "success");
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            response.put("message", "Failed to delete completed tasks.");
+        if (userOpt.isEmpty()) {
+            response.put("message", "User not found.");
             response.put("status", "error");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-    }
 
+        User user = userOpt.get();
+
+        int deletedCount = taskService.deleteCompletedTasksByUser(user.getUser_id());
+
+        response.put("message", "Deleted " + deletedCount + " completed tasks.");
+        response.put("status", "success");
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        response.put("message", "Failed to delete completed tasks.");
+        response.put("status", "error");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+}
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails

@@ -26,16 +26,6 @@ public class TaskService {
         this.userRepository = userRepository;
     }
 
-    @Transactional
-    public int deleteAllCompletedTasks() {
-        return taskRepository.deleteByCompleted();
-    }
-
-    // create a new task
-
-//    public Task createTask(Task task) {
-//        return taskRepository.save(task);
-//    }
 
     public Task createTask(Task task, Long userId) {
         System.out.println("🔥 Incoming Task: " + task);
@@ -161,9 +151,12 @@ public class TaskService {
     }
 
 
-    public int deleteCompletedTasksByUser(User user) {
-        return taskRepository.deleteByCreatedByAndCompletedTrue(user.getUser_id()); // Pass user ID
+    @Transactional
+    public int deleteCompletedTasksByUser(Long userId) {
+        return taskRepository.deleteCompletedTasksByUser(userId); // Pass only the userId
     }
+
+
 
 
     private LocalDateTime calculateNextRepeatDate(int repeatInterval) {

@@ -1,5 +1,6 @@
 package com.flowx.models;
 
+//import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank; // checks specific field
 import jakarta.validation.constraints.Size;
@@ -50,6 +51,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false) // update foreign key
+//    @JsonBackReference // prevents infinite recursion
     private User createdBy; // store the user who made the task
 
     // CONSTRUCTORS

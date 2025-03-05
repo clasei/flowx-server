@@ -1,5 +1,6 @@
 package com.flowx.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class User {
     private String role = "user"; // Default role -- user, admin...
 
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // controls serialization, prevents infinite recurison
     private List<Task> tasks = new ArrayList<>(); // relation user - task
 
 

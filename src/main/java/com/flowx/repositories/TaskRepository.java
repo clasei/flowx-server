@@ -17,13 +17,15 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByNextRepeatDateBeforeAndCompleted(LocalDateTime now, boolean completed);
     List<Task> findByCreatedBy(User user);
 
-    @Transactional
-    @Modifying
-    @Query("DELETE FROM Task t WHERE t.completed = true")
-    int deleteByCompleted();
+//    @Transactional
+//    @Modifying
+//    @Query("DELETE FROM Task t WHERE t.completed = true")
+//    int deleteByCompleted();
 
     @Modifying
+    @Transactional
     @Query("DELETE FROM Task t WHERE t.createdBy.id = :userId AND t.completed = true")
-    int deleteByCreatedByAndCompletedTrue(@Param("userId") Long userId);
+    int deleteCompletedTasksByUser(@Param("userId") Long userId);
+
 
 }
