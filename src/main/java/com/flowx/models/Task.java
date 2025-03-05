@@ -13,7 +13,8 @@ public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Primary Key
+    @Column(name = "task_id") // Rename column for clarity
+    private Long task_id; // Primary Key
 
     @NotBlank(message = "choose a title for your task")
     @Size(min = 3, max = 120, message = "title must be between 3 and 120 chars")
@@ -30,15 +31,16 @@ public class Task {
     @Column(nullable = false)
     private int priority; // store priority as an int
 
-    @Column(updatable = false)
+    @Column(updatable = false) // Prevents updates
     private LocalDateTime createdAt;
+
+    @Column(nullable = false) // Ensure updates are stored
     private LocalDateTime updatedAt;
 
     // new feature: recurring tasks
     @JsonProperty("repeating") // ensures JSON maps this as "repeating"
     @Column(nullable = false)
     private boolean repeating = false;
-//    private Boolean repeating;
 
     @Column
     private Integer repeatInterval; // Days
@@ -47,8 +49,8 @@ public class Task {
     private LocalDateTime nextRepeatDate;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
-    private User createdBy; // Store the user who made the task
+    @JoinColumn(name = "user_id", nullable = false) // update foreign key
+    private User createdBy; // store the user who made the task
 
     // CONSTRUCTORS
     public Task() {
@@ -81,8 +83,8 @@ public class Task {
     }
 
     // GETTERS & SETTERS
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getTask_id() { return task_id; }  // Match field name
+    public void setTask_id(Long task_id) { this.task_id = task_id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -96,6 +98,12 @@ public class Task {
     public int getPriority() { return priority; }
     public void setPriority(int priorityValue) { this.priority = priorityValue; }
 
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
     // ----------- is repeating ----- issues solved
     @JsonProperty("repeating") // ensures JSON correctly maps "repeating"
     public boolean isRepeating() { return repeating; }
@@ -108,11 +116,7 @@ public class Task {
     public LocalDateTime getNextRepeatDate() { return nextRepeatDate; }
     public void setNextRepeatDate(LocalDateTime nextRepeatDate) { this.nextRepeatDate = nextRepeatDate; }
 
-    public User getCreatedBy() { return createdBy; }
+    public User getCreatedBy() { return createdBy; }  // fetch associated user
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
 }

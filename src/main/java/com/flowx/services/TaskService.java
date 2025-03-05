@@ -37,8 +37,8 @@ public class TaskService {
 //        return taskRepository.save(task);
 //    }
 
-    public Task createTask(Task task, Long userId) {  // 🔹 Now accepts userId
-        System.out.println("🔥 Incoming Task: " + task);  // Debugging
+    public Task createTask(Task task, Long userId) {
+        System.out.println("🔥 Incoming Task: " + task);
 
         // Fetch user from database
         User user = userRepository.findById(userId)
@@ -68,13 +68,13 @@ public class TaskService {
     }
 
     // get a task by id
-    public Optional<Task> getTaskById(Long id) {
-        return taskRepository.findById(id);
+    public Optional<Task> getTaskById(Long task_id) {
+        return taskRepository.findById(task_id);
     }
 
     // update a task -- by id
-    public Task updateTask(Long id, Task newTaskData) {
-        return taskRepository.findById(id)
+    public Task updateTask(Long task_id, Task newTaskData) {
+        return taskRepository.findById(task_id)
                 .map(task -> {
                     task.setTitle(newTaskData.getTitle());
                     task.setDescription(newTaskData.getDescription());
@@ -117,52 +117,13 @@ public class TaskService {
 
 
 
-
     // put = save toggled task
     public Task saveTask(Task task) {
         return taskRepository.save(task);
     }
 
-    // toggle task completion
-//    public Task toggleTaskCompletion(Long id) {
-//        return taskRepository.findById(id)
-//                .map(task -> {
-//                    task.setCompleted(!task.isCompleted());
-//                    task.setUpdatedAt(LocalDateTime.now());
-//
-//                    if (task.isRepeating() && task.isCompleted() && task.getRepeatInterval() != null) {
-//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-//                    } else {
-//                        task.setNextRepeatDate(null);
-//                    }
-//
-//                    return taskRepository.save(task);
-//                })
-//                .orElseThrow(() -> new RuntimeException("Task not found"));
-//    }
-
-    // // WEIRD WAY -- reset next repeat date when undo --------------
-//    public Task toggleTaskCompletion(Long id) {
-//        return taskRepository.findById(id)
-//                .map(task -> {
-//                    task.setCompleted(!task.isCompleted());
-//                    task.setUpdatedAt(LocalDateTime.now());
-//
-//                    if (task.isCompleted() && task.isRepeating() && task.getRepeatInterval() != null) {
-//                        // 🔥 Ensure next repeat date is set correctly
-//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-//                    } else if (!task.isRepeating()) {
-//                        // 🔥 If it's not repeating, reset nextRepeatDate
-//                        task.setNextRepeatDate(null);
-//                    }
-//
-//                    return taskRepository.save(task);
-//                })
-//                .orElseThrow(() -> new RuntimeException("Task not found"));
-//    }
-
-    public Task toggleTaskCompletion(Long id) {
-        return taskRepository.findById(id)
+    public Task toggleTaskCompletion(Long task_id) {
+        return taskRepository.findById(task_id)
                 .map(task -> {
                     task.setCompleted(!task.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
@@ -179,12 +140,12 @@ public class TaskService {
     }
 
 
-
     // delete a task -- by id
-    public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+    public void deleteTask(Long task_id) {
+        taskRepository.deleteById(task_id);
     }
 
+    // reset recurring tasks ------------------
     @Scheduled(fixedRate = 3600000)
 //    @Scheduled(fixedRate = 60000) // runs every minute for testing --- DEBUG ONLY
     public void resetRecurringTasks() {
@@ -199,9 +160,9 @@ public class TaskService {
         }
     }
 
-    // delete completed by user
+
     public int deleteCompletedTasksByUser(User user) {
-        return taskRepository.deleteByCreatedByAndCompletedTrue(user);
+        return taskRepository.deleteByCreatedByAndCompletedTrue(user.getUser_id()); // Pass user ID
     }
 
 

@@ -23,7 +23,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     int deleteByCompleted();
 
     @Modifying
-    @Query("DELETE FROM Task t WHERE t.createdBy = :user AND t.completed = true")
-    int deleteByCreatedByAndCompletedTrue(@Param("user") User user);
+    @Query("DELETE FROM Task t WHERE t.createdBy.id = :userId AND t.completed = true")
+    int deleteByCreatedByAndCompletedTrue(@Param("userId") Long userId);
 
 }
