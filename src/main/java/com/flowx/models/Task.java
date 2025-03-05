@@ -38,6 +38,7 @@ public class Task {
     @JsonProperty("repeating") // ensures JSON maps this as "repeating"
     @Column(nullable = false)
     private boolean repeating = false;
+//    private Boolean repeating;
 
     @Column
     private Integer repeatInterval; // Days

@@ -249,6 +249,12 @@ public class TaskController {
             if (taskData.getNextRepeatDate() != null) existingTask.setNextRepeatDate(taskData.getNextRepeatDate());
             if (taskData.getRepeatInterval() != null) existingTask.setRepeatInterval(taskData.getRepeatInterval());
 
+//            if (taskData.getRepeating() != null) {
+//                existingTask.setRepeating(taskData.getRepeating());
+//            }
+
+            existingTask.setRepeating(taskData.isRepeating());
+
             existingTask.setUpdatedAt(java.time.LocalDateTime.now()); // ✅ Update timestamp
 
             // ✅ Save and return updated task

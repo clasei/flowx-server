@@ -82,18 +82,34 @@ public class TaskService {
                     task.setCompleted(newTaskData.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
 
-                    // Preserve repeating status
-                    task.setRepeating(newTaskData.isRepeating());
-                    task.setRepeatInterval(newTaskData.getRepeatInterval());
+//                    // Preserve repeating status
+//                    task.setRepeating(newTaskData.isRepeating());
+//                    task.setRepeatInterval(newTaskData.getRepeatInterval());
+//
+//                    // 🔥 Always recalculate nextRepeatDate if task is repeating
+//                    if (task.isRepeating() && task.getRepeatInterval() != null) {
+//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+//                    } else {
+//                        // ❌ If repeating is turned off, clear nextRepeatDate
+//                        task.setNextRepeatDate(null);
+//                    }
 
-                    // 🔥 Always recalculate nextRepeatDate if task is repeating
+                    // ✅ debug
+                    System.out.println("📥 Incoming repeating: " + newTaskData.isRepeating());
+                    System.out.println("📥 Incoming repeatInterval: " + newTaskData.getRepeatInterval());
+
+                    // ✅ ensure repeating status updates properly
+                    task.setRepeating(newTaskData.isRepeating());
+                    task.setRepeatInterval(newTaskData.isRepeating() ? newTaskData.getRepeatInterval() : null);
+
+                    // ✅ only set nextRepeatDate if it's a recurring task
                     if (task.isRepeating() && task.getRepeatInterval() != null) {
                         task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
                     } else {
-                        // ❌ If repeating is turned off, clear nextRepeatDate
                         task.setNextRepeatDate(null);
                     }
 
+                    System.out.println("🔄 After update: " + task.isRepeating()); // Debugging
                     return taskRepository.save(task);
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
@@ -170,6 +186,7 @@ public class TaskService {
     }
 
     @Scheduled(fixedRate = 3600000)
+//    @Scheduled(fixedRate = 60000) // runs every minute for testing --- DEBUG ONLY
     public void resetRecurringTasks() {
         LocalDateTime now = LocalDateTime.now();
         List<Task> overdueTasks = taskRepository.findByNextRepeatDateBeforeAndCompleted(now, true);
