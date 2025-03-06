@@ -57,13 +57,13 @@ public class AuthController {
 
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+            return ResponseEntity.status(401).body(Map.of("message", "did you forget your email?"));
         }
 
         User user = userOpt.get();
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+            return ResponseEntity.status(401).body(Map.of("message", "that's not your password"));
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), "user");
