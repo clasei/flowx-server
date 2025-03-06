@@ -2,6 +2,7 @@ package com.flowx.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -34,13 +35,21 @@ public class User {
     private Long user_id; // user ID
 
     @Column(nullable = false, unique = true)
+    @Size(min = 3, max = 24, message = "username must be between 3 and 24 characters")
     private String username;
 
     @Column(nullable = false, unique = true)
+    @Email(message = "invalid email format")
     private String email;
 
-    @Column(nullable = false)
-    private String password; // Store hashed password -- ADD THIS later !!!!
+    @NotBlank(message = "password is required")
+    @Size(min = 7, message = "password must be at least 7 characters long")
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{7,}$",
+            message = "password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number")
+    private String password;
+
+//    @Column(nullable = false)
+//    private String password; // Store hashed password -- CHECK THIS later !!!! --> on it
 
     @Column(nullable = false)
     private String role = "user"; // Default role -- user, admin...

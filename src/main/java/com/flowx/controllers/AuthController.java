@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+
+import jakarta.validation.Valid;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -31,25 +34,17 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody Map<String, String> request) {
-        String username = request.get("username");
-        String email = request.get("email");
-        String password = request.get("password");
 
-        if (userRepository.findByEmail(email).isPresent() || userRepository.findByUsername(username).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "User already exists"));
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody User newUser) {  // ✅ USAMOS `User` directamente
+        if (userRepository.findByEmail(newUser.getEmail()).isPresent() || userRepository.findByUsername(newUser.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "user already exists"));
         }
 
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setEmail(email);
-        newUser.setPassword(passwordEncoder.encode(password)); // ✅ Correctly hash the password
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));  // ✅ Hash password
         userRepository.save(newUser);
 
-        String token = jwtUtil.generateToken(username, "user");
-        System.out.println("Generated Token: " + token);  // ✅ Debug
-
+        String token = jwtUtil.generateToken(newUser.getUsername(), "user");
 
         return ResponseEntity.ok(Map.of("token", token));
     }
@@ -67,15 +62,17 @@ public class AuthController {
 
         User user = userOpt.get();
 
-        if (!passwordEncoder.matches(password, user.getPassword())) { // ✅ Correct comparison
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), "user");
-        System.out.println("Generated Token: " + token); // ✅ Debugging
+        System.out.println("Generated Token: " + token);
 
-        return ResponseEntity.ok(Map.of("token", token));
+        return ResponseEntity.ok(Map.of(
+                "token", token,
+                "username", user.getUsername()
+        ));
     }
-
 
 }

@@ -22,20 +22,6 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/auth/**").permitAll()  // Allow login/signup
-//                        .requestMatchers("/tasks/**").authenticated()  // Protect all task routes
-//                        .anyRequest().authenticated()
-//                )
-//                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,9 +32,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/tasks/**").authenticated()
-
-//                        .requestMatchers(HttpMethod.GET, "/tasks/**").authenticated()
-//                        .requestMatchers(HttpMethod.POST, "/tasks/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
