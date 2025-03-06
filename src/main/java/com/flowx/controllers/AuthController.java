@@ -41,7 +41,7 @@ public class AuthController {
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-        newUser.setPassword(password); // TODO: Hash password later !!!!
+        newUser.setPassword(password); // TODO: Hash password later !!!! on it
         userRepository.save(newUser);
 
         // Generate token
