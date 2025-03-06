@@ -35,17 +35,17 @@ public class User {
     private Long user_id; // user ID
 
     @Column(nullable = false, unique = true)
-    @Size(min = 3, max = 24, message = "username must be between 3 and 24 characters")
+    @Size(min = 3, max = 21, message = "your username must be between 3 and 21 characters")
     private String username;
 
     @Column(nullable = false, unique = true)
-    @Email(message = "invalid email format")
+    @Email(message = "that doesn't look like an email")
     private String email;
 
-    @NotBlank(message = "password is required")
-    @Size(min = 7, message = "password must be at least 7 characters long")
+    @NotBlank(message = "hey, you really need a password")
+    @Size(min = 7, message = "you need more than 7 characters to build a password")
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d).{7,}$",
-            message = "password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number")
+            message = "make your password safe: 1 uppercase, 1 lowercase, and 1 number — min")
     private String password;
 
 //    @Column(nullable = false)
