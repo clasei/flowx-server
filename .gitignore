@@ -65,6 +65,3 @@ replay_pid*
 # application.properties + pws
 src/main/resources/application.properties
 application.yml
-
-# Ignore environment files
-.env

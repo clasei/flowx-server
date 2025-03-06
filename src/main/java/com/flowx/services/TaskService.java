@@ -1,8 +1,9 @@
 package com.flowx.services;
 
 import com.flowx.models.Task;
-import com.flowx.models.TaskPriority;
 import com.flowx.repositories.TaskRepository;
+import com.flowx.models.User;
+import com.flowx.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,25 +18,23 @@ import java.time.LocalDateTime;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, UserRepository userRepository) {
         this.taskRepository = taskRepository;
+        this.userRepository = userRepository;
     }
 
-    @Transactional
-    public int deleteAllCompletedTasks() {
-        return taskRepository.deleteByCompleted();
-    }
 
-    // create a new task
+    public Task createTask(Task task, Long userId) {
+        System.out.println("🔥 Incoming Task: " + task);
 
-//    public Task createTask(Task task) {
-//        return taskRepository.save(task);
-//    }
+        // Fetch user from database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    public Task createTask(Task task) {
-        System.out.println("🔥 Incoming Task: " + task);  // Debugging
+        task.setCreatedBy(user); // Assign the user before saving
 
         // Ensure isRepeating is correctly assigned
         boolean isActuallyRepeating = task.isRepeating(); // Capture the original value
@@ -53,20 +52,19 @@ public class TaskService {
     }
 
 
-
     // get all tasks
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
 
     // get a task by id
-    public Optional<Task> getTaskById(Long id) {
-        return taskRepository.findById(id);
+    public Optional<Task> getTaskById(Long task_id) {
+        return taskRepository.findById(task_id);
     }
 
     // update a task -- by id
-    public Task updateTask(Long id, Task newTaskData) {
-        return taskRepository.findById(id)
+    public Task updateTask(Long task_id, Task newTaskData) {
+        return taskRepository.findById(task_id)
                 .map(task -> {
                     task.setTitle(newTaskData.getTitle());
                     task.setDescription(newTaskData.getDescription());
@@ -74,23 +72,38 @@ public class TaskService {
                     task.setCompleted(newTaskData.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
 
-                    // Preserve repeating status
-                    task.setRepeating(newTaskData.isRepeating());
-                    task.setRepeatInterval(newTaskData.getRepeatInterval());
+//                    // Preserve repeating status
+//                    task.setRepeating(newTaskData.isRepeating());
+//                    task.setRepeatInterval(newTaskData.getRepeatInterval());
+//
+//                    // 🔥 Always recalculate nextRepeatDate if task is repeating
+//                    if (task.isRepeating() && task.getRepeatInterval() != null) {
+//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
+//                    } else {
+//                        // ❌ If repeating is turned off, clear nextRepeatDate
+//                        task.setNextRepeatDate(null);
+//                    }
 
-                    // 🔥 Always recalculate nextRepeatDate if task is repeating
+                    // ✅ debug
+                    System.out.println("📥 Incoming repeating: " + newTaskData.isRepeating());
+                    System.out.println("📥 Incoming repeatInterval: " + newTaskData.getRepeatInterval());
+
+                    // ✅ ensure repeating status updates properly
+                    task.setRepeating(newTaskData.isRepeating());
+                    task.setRepeatInterval(newTaskData.isRepeating() ? newTaskData.getRepeatInterval() : null);
+
+                    // ✅ only set nextRepeatDate if it's a recurring task
                     if (task.isRepeating() && task.getRepeatInterval() != null) {
                         task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
                     } else {
-                        // ❌ If repeating is turned off, clear nextRepeatDate
                         task.setNextRepeatDate(null);
                     }
 
+                    System.out.println("🔄 After update: " + task.isRepeating()); // Debugging
                     return taskRepository.save(task);
                 })
                 .orElseThrow(() -> new RuntimeException("Task not found"));
     }
-
 
 
 
@@ -99,46 +112,8 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    // toggle task completion
-//    public Task toggleTaskCompletion(Long id) {
-//        return taskRepository.findById(id)
-//                .map(task -> {
-//                    task.setCompleted(!task.isCompleted());
-//                    task.setUpdatedAt(LocalDateTime.now());
-//
-//                    if (task.isRepeating() && task.isCompleted() && task.getRepeatInterval() != null) {
-//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-//                    } else {
-//                        task.setNextRepeatDate(null);
-//                    }
-//
-//                    return taskRepository.save(task);
-//                })
-//                .orElseThrow(() -> new RuntimeException("Task not found"));
-//    }
-
-    // // WEIRD WAY -- reset next repeat date when undo --------------
-//    public Task toggleTaskCompletion(Long id) {
-//        return taskRepository.findById(id)
-//                .map(task -> {
-//                    task.setCompleted(!task.isCompleted());
-//                    task.setUpdatedAt(LocalDateTime.now());
-//
-//                    if (task.isCompleted() && task.isRepeating() && task.getRepeatInterval() != null) {
-//                        // 🔥 Ensure next repeat date is set correctly
-//                        task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval()));
-//                    } else if (!task.isRepeating()) {
-//                        // 🔥 If it's not repeating, reset nextRepeatDate
-//                        task.setNextRepeatDate(null);
-//                    }
-//
-//                    return taskRepository.save(task);
-//                })
-//                .orElseThrow(() -> new RuntimeException("Task not found"));
-//    }
-
-    public Task toggleTaskCompletion(Long id) {
-        return taskRepository.findById(id)
+    public Task toggleTaskCompletion(Long task_id) {
+        return taskRepository.findById(task_id)
                 .map(task -> {
                     task.setCompleted(!task.isCompleted());
                     task.setUpdatedAt(LocalDateTime.now());
@@ -155,13 +130,14 @@ public class TaskService {
     }
 
 
-
     // delete a task -- by id
-    public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
+    public void deleteTask(Long task_id) {
+        taskRepository.deleteById(task_id);
     }
 
+    // reset recurring tasks ------------------
     @Scheduled(fixedRate = 3600000)
+//    @Scheduled(fixedRate = 60000) // runs every minute for testing --- DEBUG ONLY
     public void resetRecurringTasks() {
         LocalDateTime now = LocalDateTime.now();
         List<Task> overdueTasks = taskRepository.findByNextRepeatDateBeforeAndCompleted(now, true);
@@ -173,6 +149,15 @@ public class TaskService {
             taskRepository.save(task);
         }
     }
+
+
+    @Transactional
+    public int deleteCompletedTasksByUser(Long userId) {
+        return taskRepository.deleteCompletedTasksByUser(userId); // Pass only the userId
+    }
+
+
+
 
     private LocalDateTime calculateNextRepeatDate(int repeatInterval) {
         return LocalDateTime.now().plusDays(repeatInterval);
