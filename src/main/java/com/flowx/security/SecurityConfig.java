@@ -17,8 +17,8 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    @Value("${cors.allowed.origins}")
-    private String allowedOrigins;
+//    @Value("${cors.allowed.origins}")
+//    private String allowedOrigins;
 
     private final JwtFilter jwtFilter;
 
@@ -44,13 +44,28 @@ public class SecurityConfig {
         return http.build();
     }
 
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+////        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+////        configuration.setAllowedOrigins(List.of(allowedOrigins));
+//        configuration.setAllowedOrigins(List.of("https://flowx-woad.vercel.app"));
+//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+////        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+//        configuration.setAllowedHeaders(List.of("*"));
+//        configuration.setAllowCredentials(true); // allows cookies & authentication headers
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedOrigins(List.of(allowedOrigins));
+//        configuration.setAllowedOrigins(List.of("https://flowx-woad.vercel.app", "http://localhost:4200"));
+        configuration.setAllowedOrigins(List.of("https://flowx-woad.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // allows cookies & authentication headers
 
@@ -58,4 +73,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
+
 }
