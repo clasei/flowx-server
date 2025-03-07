@@ -32,10 +32,10 @@ public class Task {
     @Column(nullable = false)
     private int priority; // store priority as an int
 
-    @Column(updatable = false) // Prevents updates
+    @Column(name = "created_at", updatable = false) // Prevents updates
     private LocalDateTime createdAt;
 
-    @Column(nullable = false) // Ensure updates are stored
+    @Column(name = "updated_at", nullable = false) // Ensure updates are stored
     private LocalDateTime updatedAt;
 
     // new feature: recurring tasks
