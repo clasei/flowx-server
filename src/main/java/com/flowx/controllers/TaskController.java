@@ -395,6 +395,14 @@ public ResponseEntity<Map<String, Object>> deleteAllCompletedTasks() {
     }
 }
 
+    // --------------------- reactivate repeating tasks --------- TEST & DEBUG
+    @PutMapping("/tasks/reactivate")
+    public ResponseEntity<String> reactivateRepeatingTasks() {
+        int count = taskService.reactivateRepeatingTasks();
+        return ResponseEntity.ok("Reactivated " + count + " tasks.");
+    }
+    // ---------------------------------------------
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // return 400 if validation fails
     @ExceptionHandler(MethodArgumentNotValidException.class) // catch validation errors

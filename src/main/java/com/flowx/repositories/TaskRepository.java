@@ -14,7 +14,12 @@ import java.util.List;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
+
+    // Finds repeating tasks that are completed and have a nextRepeatDate before 'now'
+    List<Task> findByRepeatingTrueAndCompletedTrueAndNextRepeatDateBefore(LocalDateTime now);
+
     List<Task> findByNextRepeatDateBeforeAndCompleted(LocalDateTime now, boolean completed);
+
     List<Task> findByCreatedBy(User user);
 
 //    @Transactional
@@ -27,5 +32,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("DELETE FROM Task t WHERE t.createdBy.id = :userId AND t.completed = true")
     int deleteCompletedTasksByUser(@Param("userId") Long userId);
 
-
 }
+

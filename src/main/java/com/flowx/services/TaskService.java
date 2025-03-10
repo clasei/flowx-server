@@ -150,6 +150,27 @@ public class TaskService {
         }
     }
 
+    // reactivate any repeating task --------------------------------- TEST & DEBUG
+    public int reactivateRepeatingTasks() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Task> overdueTasks = taskRepository.findByRepeatingTrueAndCompletedTrueAndNextRepeatDateBefore(now);
+
+        if (overdueTasks.isEmpty()) {
+            return 0;
+        }
+
+        for (Task task : overdueTasks) {
+            System.out.println("🔄 Reactivating task: " + task.getTitle());
+            task.setCompleted(false);
+            task.setNextRepeatDate(calculateNextRepeatDate(task.getRepeatInterval())); // set next repeat date
+            taskRepository.save(task);
+        }
+
+        return overdueTasks.size(); // return count of reactivated tasks
+    }
+    // --------------------------------------------------------------------
+
 
     @Transactional
     public int deleteCompletedTasksByUser(Long userId) {
