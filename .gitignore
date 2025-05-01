@@ -63,5 +63,5 @@ replay_pid*
 .m2/
 
 # application.properties + pws
-src/main/resources/application.properties
+#src/main/resources/application.properties
 application.yml
